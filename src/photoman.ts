@@ -51,10 +51,48 @@ export default class Photoman {
       this.drawHLine(output, width, rect.maxY, rect.maxX, rect.minX, 255, 0, 0)
     })
 
-    fs.writeFileSync('diff.png ', PNG.sync.write(outputPng))
+    const combined = this.getCombinedImage(img1, img2, outputPng, width, height)
+    fs.writeFileSync('diff.png ', PNG.sync.write(combined))
     console.log('pixel count:', pxCount)
     console.log('test', reacts.length)
   }
+
+  getCombinedImage(img1: PNG, img2: PNG, img3: PNG, width: number, height: number) {
+    const outputPng = new PNG({ width, height: height * 3 })
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const pos1 = (y * width + x) * 4
+        const pos2 = ((y + height) * width + x) * 4
+        const pos3 = ((y + height * 2) * width + x) * 4
+
+        this.drawPixel(
+          outputPng.data,
+          pos1,
+          img1.data[pos1 + 0],
+          img1.data[pos1 + 1],
+          img1.data[pos1 + 2]
+        )
+        this.drawPixel(
+          outputPng.data,
+          pos2,
+          img2.data[pos1 + 0],
+          img2.data[pos1 + 1],
+          img2.data[pos1 + 2]
+        )
+        this.drawPixel(
+          outputPng.data,
+          pos3,
+          img3.data[pos1 + 0],
+          img3.data[pos1 + 1],
+          img3.data[pos1 + 2]
+        )
+      }
+    }
+
+    return outputPng
+  }
+
   rgb2y(r: number, g: number, b: number) {
     return r * 0.29889531 + g * 0.58662247 + b * 0.11448223
   }
